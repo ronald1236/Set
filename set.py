@@ -5,9 +5,10 @@ import random
 
 # activate the pygame library .
 pygame.init()
+pygame.font.init()
 
 # maak een scherm aan (4 bij 3 kaarten)
-screen = pygame.display.set_mode((416, 612))
+screen = pygame.display.set_mode((416, 662))
 
 # laad alle kaarten
 def load_images(path_to_directory):
@@ -23,6 +24,12 @@ def load_images(path_to_directory):
     return image_dict, filename_dict
 
 image_dict, filename_dict = load_images(r"kaarten")
+
+#scorebord laten zien
+score_font = pygame.font.SysFont("Arial", 30)
+def draw_score(score):
+    text = score_font.render(f"Score: {score}", True, (255, 255, 255))
+    screen.blit(text, (10, 620)) 
 
 # kies 12 random start kaarten
 start_kaarten = random.sample(list(image_dict),12)
@@ -128,6 +135,9 @@ def new_kaart():
     new = random.choice([i for i in list(image_dict.keys()) if i not in start_kaarten])
     return new
 
+score = 0
+score_increment = 1
+
 # Main loop
 running = True
 last_clicked = 12
@@ -148,6 +158,7 @@ while running:
                     last_clicked = kaart_positie
                     if clicks == 3:
                         if is_set(clicked):
+                            score += score_increment
                             new_kaarten(clicked)
                         clicked = []
                         clicks = 0
@@ -162,6 +173,8 @@ while running:
             kaart = image_dict[kaart_key]
             screen.blit(kaart, (2 + x * 104, 2 + y * 204))
             i += 1
+    screen.fill('black', rect=(0, 662, 416, 40))
+    draw_score(score)
     pygame.display.flip()
 
 # Clean up
