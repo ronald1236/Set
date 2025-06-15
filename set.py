@@ -6,8 +6,13 @@ import random
 # activate the pygame library .
 pygame.init()
 
+# aantal secondes voordat de computer reageert
+diffuculty = 5
+
 # maak een scherm aan (4 bij 3 kaarten)
 screen = pygame.display.set_mode((416, 612))
+
+start_time = pygame.time.get_ticks()
 
 # laad alle kaarten
 def load_images(path_to_directory):
@@ -92,7 +97,31 @@ def kaart_naar_tuple(kaart_pos):
         aantal = 2
 
     return (kleur, vorm, vulling, aantal)
-        
+
+def show_set(set):
+    for kaart in set:
+        row = kaart // 4
+        col = kaart % 4
+        screen.fill('blue', rect = (col * 104, row * 204, 104, 204))
+        kaart_key = start_kaarten[kaart]
+        kaart_image = image_dict[kaart_key]
+        screen.blit(kaart_image, (2 + col * 104, 2 + row * 204))
+
+def find_set():
+    for i in range (12):
+        for j in range (i + 1, 12):
+            for k in range (j + 1,12):
+                if is_set([i, j, k]):
+                    show_set([i, j, k])
+                    pygame.display.flip()
+                    pygame.time.wait(1000)
+                    screen.fill('black')
+                    new_kaarten([i, j, k])
+                    return
+    change_cards()
+
+def change_cards():
+    new_kaarten([0, 1, 2])
 
 def is_set(clicked):
     kaart_tuples = []
@@ -134,6 +163,9 @@ last_clicked = 12
 clicked = []
 clicks = 0
 while running:
+    if pygame.time.get_ticks() - start_time >= diffuculty * 1000:
+        find_set()
+        start_time = pygame.time.get_ticks()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -153,7 +185,7 @@ while running:
                         clicks = 0
                         screen.fill('black')
                         last_clicked = 13
-
+                        start_time = pygame.time.get_ticks()
 
     i = 0
     for y in range(3):
