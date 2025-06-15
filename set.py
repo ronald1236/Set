@@ -1,18 +1,27 @@
-# importing required library
 import pygame
 import os 
 import random
 
-# activate the pygame library .
+# activeer de pygame library
 pygame.init()
 pygame.font.init()
 
 # aantal secondes voordat de computer reageert
-diffuculty = 5
+diffuculty = 30
+
+# zet start score
+player_score = 0
+computer_score = 0
+
+# zet start values
+last_clicked = 12
+clicked = []
+clicks = 0
 
 # maak een scherm aan (4 bij 3 kaarten)
 screen = pygame.display.set_mode((416, 662))
 
+# begin timer
 start_time = pygame.time.get_ticks()
 
 # laad alle kaarten
@@ -32,21 +41,16 @@ image_dict, filename_dict = load_images(r"kaarten")
 
 #scorebord laten zien
 score_font = pygame.font.SysFont("Arial", 30)
-def draw_score(score):
-    text = score_font.render(f"Score: {score}", True, (255, 255, 255))
-    screen.blit(text, (10, 620)) 
+def draw_score(player_score, computer_score):
+    player_text = score_font.render(f"Player: {player_score}", True, (255, 255, 255))
+    computer_text = score_font.render(f"Computer: {computer_score}", True, (255, 255, 255))
+    screen.blit(player_text, (10, 615))
+    screen.blit(computer_text, (215, 615))
 
 # kies 12 random start kaarten
 start_kaarten = random.sample(list(image_dict),12)
 
-def get_kaart(pos):
-    x, y = pos
-    col = x // 104
-    row = y // 204
-    if 0 <= col < 4 and 0 <= row < 3:
-        return start_kaarten[row * 4 + col]
-    return None
-
+# krijg de positie van een kaart in start_kaarten lijst
 def get_kaart_pos(pos):
     x, y = pos
     col = x // 104
@@ -55,12 +59,14 @@ def get_kaart_pos(pos):
         return row * 4 + col
     return None
 
+# maak rand om de geklickte kaart groen
 def show_clicked(pos):
     x, y = pos
     col = x // 104
     row = y // 204
     screen.fill('green', rect = (col * 104, row * 204, 104, 204))
 
+# zet een de naam van een kaart om naar een tuple (#,#,#,#)
 def kaart_naar_tuple(kaart_pos):
     kaart_key = start_kaarten[kaart_pos]
     filename = filename_dict[kaart_key]
@@ -105,6 +111,7 @@ def kaart_naar_tuple(kaart_pos):
 
     return (kleur, vorm, vulling, aantal)
 
+# maakt een blauwe rand om een set
 def show_set(set):
     for kaart in set:
         row = kaart // 4
@@ -114,7 +121,9 @@ def show_set(set):
         kaart_image = image_dict[kaart_key]
         screen.blit(kaart_image, (2 + col * 104, 2 + row * 204))
 
+# zoek naar een set
 def find_set():
+    global computer_score, clicked, clicks, last_clicked
     for i in range (12):
         for j in range (i + 1, 12):
             for k in range (j + 1,12):
@@ -124,12 +133,18 @@ def find_set():
                     pygame.time.wait(1000)
                     screen.fill('black')
                     new_kaarten([i, j, k])
+                    computer_score += 1
+                    clicked = []
+                    clicks = 0
+                    last_clicked = 12
                     return
     change_cards()
 
+# verandert de eerste drie kaarten
 def change_cards():
     new_kaarten([0, 1, 2])
 
+# check of 3 kaarten een set zijn
 def is_set(clicked):
     kaart_tuples = []
     for kaart_pos in clicked:
@@ -150,32 +165,29 @@ def is_set(clicked):
                     return True
     return False
 
+# checkt of 3 eigenschappen alle drie gelijk of alle drie anders zijn
 def check(list):
     length = len(set(list))
     if length == 1 or length == 3:
         return True
     return False
 
+# vervangt kaarten
 def new_kaarten(clicked):
     for pos in clicked:
         start_kaarten[pos] = new_kaart()
 
+# kiest random een nieuwe kaart die nog niet op het bord ligt
 def new_kaart():
     new = random.choice([i for i in list(image_dict.keys()) if i not in start_kaarten])
     return new
 
-score = 0
-score_increment = 1
-
 # Main loop
 running = True
-last_clicked = 12
-clicked = []
-clicks = 0
 while running:
     if pygame.time.get_ticks() - start_time >= diffuculty * 1000:
         find_set()
-        start_time = pygame.time.get_ticks()
+        start_time = pygame.time.get_ticks() # reset timer
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -190,7 +202,7 @@ while running:
                     last_clicked = kaart_positie
                     if clicks == 3:
                         if is_set(clicked):
-                            score += score_increment
+                            player_score += 1
                             new_kaarten(clicked)
                         clicked = []
                         clicks = 0
@@ -205,8 +217,8 @@ while running:
             kaart = image_dict[kaart_key]
             screen.blit(kaart, (2 + x * 104, 2 + y * 204))
             i += 1
-    screen.fill('black', rect=(0, 662, 416, 40))
-    draw_score(score)
+    screen.fill('black', rect=(0, 612, 416, 50))
+    draw_score(player_score, computer_score)
     pygame.display.flip()
 
 # Clean up
