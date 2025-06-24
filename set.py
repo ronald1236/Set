@@ -6,20 +6,9 @@ import random
 pygame.init()
 pygame.font.init()
 
-# zet start score
-player_score = 0
-computer_score = 0
-
-# zet start values
-last_clicked = 12
-clicked = []
-clicks = 0
-
 # maak een scherm aan (4 bij 3 kaarten)
-screen = pygame.display.set_mode((612, 662))
-
-# begin timer
-start_time = pygame.time.get_ticks()
+screen = pygame.display.set_mode((416, 662))
+pygame.display.set_caption("SET Game")
 
 # laad alle kaarten
 def load_images(path_to_directory):
@@ -36,28 +25,47 @@ def load_images(path_to_directory):
 
 image_dict, filename_dict = load_images(r"kaarten")
 
-# aantal secondes voordat de computer reageert
-def choose_difficulty_side_panel():
-    font = pygame.font.Font(None, 28)
+# Start scherm om difficulty te selecteren
+def show_start_screen():
+    font_title = pygame.font.Font(None, 72)
+    font_button = pygame.font.Font(None, 36)
+    font_subtitle = pygame.font.Font(None, 24)
+    
     selected = False
-    difficulty = 30  # default fallback
+    difficulty = 30 
 
-    # Define button positions and labels
+    # Knop posities
     buttons = [
-        {"rect": pygame.Rect(430, 100, 140, 50), "label": "easy (45s)", "value": 45, "color": (0, 200, 0)},
-        {"rect": pygame.Rect(430, 170, 140, 50), "label": "normal (30s)", "value": 30, "color": (255, 255, 0)},
-        {"rect": pygame.Rect(430, 240, 140, 50), "label": "hard (15s)", "value": 15, "color": (200, 0, 0)},
+        {"rect": pygame.Rect(108, 200, 200, 60), "label": "Easy (45s)", "value": 45, "color": (0, 200, 0)},
+        {"rect": pygame.Rect(108, 300, 200, 60), "label": "Normal (30s)", "value": 30, "color": (255, 255, 0)},
+        {"rect": pygame.Rect(108, 400, 200, 60), "label": "Hard (15s)", "value": 15, "color": (200, 0, 0)},
     ]
 
     while not selected:
-        screen.fill((0, 0, 0))
-
-        # Draw all buttons
+        screen.fill((40, 40, 40))
+        
+        # Teken titel
+        title_text = font_title.render("SET GAME", True, (255, 255, 255))
+        title_rect = title_text.get_rect(center=(208, 80))
+        screen.blit(title_text, title_rect)
+        
+        # Teken de ondertieteling
+        subtitle_text = font_subtitle.render("Select difficulty level:", True, (200, 200, 200))
+        subtitle_rect = subtitle_text.get_rect(center=(208, 150))
+        screen.blit(subtitle_text, subtitle_rect)
+        
+        # Teken de buttons
         for button in buttons:
             pygame.draw.rect(screen, button["color"], button["rect"])
-            text = font.render(button["label"], True, (0, 0, 0))
+            pygame.draw.rect(screen, (0, 0, 0), button["rect"], 3)
+            text = font_button.render(button["label"], True, (0, 0, 0))
             text_rect = text.get_rect(center=button["rect"].center)
             screen.blit(text, text_rect)
+
+        # Teken instructies
+        instruction_text = font_subtitle.render("Computer will find a set after the time limit", True, (150, 150, 150))
+        instruction_rect = instruction_text.get_rect(center=(208, 550))
+        screen.blit(instruction_text, instruction_rect)
 
         pygame.display.flip()
 
@@ -72,8 +80,22 @@ def choose_difficulty_side_panel():
                     if button["rect"].collidepoint(pos):
                         difficulty = button["value"]
                         selected = True
+                        break
+    
     return difficulty
-difficulty = choose_difficulty_side_panel()
+
+# Krijg de difficulty
+difficulty = show_start_screen()
+
+# Zet start virabelen
+player_score = 0
+computer_score = 0
+last_clicked = 12
+clicked = []
+clicks = 0
+
+# begin timer
+start_time = pygame.time.get_ticks()
 
 #scorebord laten zien
 score_font = pygame.font.SysFont("Arial", 30)
@@ -157,11 +179,12 @@ def show_set(set):
         kaart_image = image_dict[kaart_key]
         screen.blit(kaart_image, (2 + col * 104, 2 + row * 204))
 
-# message if no set is found
+# Laat zien als er geen set is gevonden
 def show_no_set_message():
     font = pygame.font.SysFont("Arial", 36)
-    text = font.render("Geen SET gevonden!", True, (255, 0, 0))
-    screen.blit(text, (80, 300))  # center-ish
+    text = font.render("No SET Found!", True, (255, 0, 0))
+    text_rect = text.get_rect(center=(208, 300))
+    screen.blit(text, text_rect)
     pygame.display.flip()
 
 # zoek naar een set
@@ -228,7 +251,10 @@ def new_kaart():
     new = random.choice([i for i in list(image_dict.keys()) if i not in start_kaarten])
     return new
 
-# Main loop
+# Clear het scherm voordat je begint
+screen.fill('black')
+
+# Main game loop
 running = True
 while running:
     if pygame.time.get_ticks() - start_time >= difficulty * 1000:
