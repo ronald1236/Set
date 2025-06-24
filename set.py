@@ -7,7 +7,7 @@ pygame.init()
 pygame.font.init()
 
 # aantal secondes voordat de computer reageert
-diffuculty = 30
+difficulty = 30
 
 # zet start score
 player_score = 0
@@ -121,6 +121,13 @@ def show_set(set):
         kaart_image = image_dict[kaart_key]
         screen.blit(kaart_image, (2 + col * 104, 2 + row * 204))
 
+# message if no set is found
+def show_no_set_message():
+    font = pygame.font.SysFont("Arial", 36)
+    text = font.render("Geen SET gevonden!", True, (255, 0, 0))
+    screen.blit(text, (80, 300))  # center-ish
+    pygame.display.flip()
+
 # zoek naar een set
 def find_set():
     global computer_score, clicked, clicks, last_clicked
@@ -138,6 +145,9 @@ def find_set():
                     clicks = 0
                     last_clicked = 12
                     return
+    show_no_set_message()
+    pygame.time.wait(1500)
+    screen.fill('black')
     change_cards()
 
 # verandert de eerste drie kaarten
@@ -185,7 +195,7 @@ def new_kaart():
 # Main loop
 running = True
 while running:
-    if pygame.time.get_ticks() - start_time >= diffuculty * 1000:
+    if pygame.time.get_ticks() - start_time >= difficulty * 1000:
         find_set()
         start_time = pygame.time.get_ticks() # reset timer
     for event in pygame.event.get():
@@ -204,11 +214,11 @@ while running:
                         if is_set(clicked):
                             player_score += 1
                             new_kaarten(clicked)
+                            start_time = pygame.time.get_ticks()
                         clicked = []
                         clicks = 0
                         screen.fill('black')
                         last_clicked = 13
-                        start_time = pygame.time.get_ticks()
 
     i = 0
     for y in range(3):
