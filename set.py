@@ -6,9 +6,6 @@ import random
 pygame.init()
 pygame.font.init()
 
-# aantal secondes voordat de computer reageert
-difficulty = 30
-
 # zet start score
 player_score = 0
 computer_score = 0
@@ -19,7 +16,7 @@ clicked = []
 clicks = 0
 
 # maak een scherm aan (4 bij 3 kaarten)
-screen = pygame.display.set_mode((416, 662))
+screen = pygame.display.set_mode((612, 662))
 
 # begin timer
 start_time = pygame.time.get_ticks()
@@ -38,6 +35,45 @@ def load_images(path_to_directory):
     return image_dict, filename_dict
 
 image_dict, filename_dict = load_images(r"kaarten")
+
+# aantal secondes voordat de computer reageert
+def choose_difficulty_side_panel():
+    font = pygame.font.Font(None, 28)
+    selected = False
+    difficulty = 30  # default fallback
+
+    # Define button positions and labels
+    buttons = [
+        {"rect": pygame.Rect(430, 100, 140, 50), "label": "easy (45s)", "value": 45, "color": (0, 200, 0)},
+        {"rect": pygame.Rect(430, 170, 140, 50), "label": "normal (30s)", "value": 30, "color": (255, 255, 0)},
+        {"rect": pygame.Rect(430, 240, 140, 50), "label": "hard (15s)", "value": 15, "color": (200, 0, 0)},
+    ]
+
+    while not selected:
+        screen.fill((0, 0, 0))
+
+        # Draw all buttons
+        for button in buttons:
+            pygame.draw.rect(screen, button["color"], button["rect"])
+            text = font.render(button["label"], True, (0, 0, 0))
+            text_rect = text.get_rect(center=button["rect"].center)
+            screen.blit(text, text_rect)
+
+        pygame.display.flip()
+
+        # Check for click
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                for button in buttons:
+                    if button["rect"].collidepoint(pos):
+                        difficulty = button["value"]
+                        selected = True
+    return difficulty
+difficulty = choose_difficulty_side_panel()
 
 #scorebord laten zien
 score_font = pygame.font.SysFont("Arial", 30)
