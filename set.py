@@ -187,6 +187,18 @@ def show_no_set_message():
     screen.blit(text, text_rect)
     pygame.display.flip()
 
+# vind alle mogelijke sets, wordt niet gebruik in het programma
+def find_all_sets():
+    sets = []
+    global computer_score, clicked, clicks, last_clicked
+    for i in range (12):
+        for j in range (i + 1, 12):
+            for k in range (j + 1,12):
+                if is_set([i, j, k]):
+                    sets.append([i, j, k])
+    return sets
+                    
+
 # zoek naar een set
 def find_set():
     global computer_score, clicked, clicks, last_clicked
