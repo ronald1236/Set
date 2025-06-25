@@ -207,7 +207,7 @@ def find_set():
                 if is_set([i, j, k]):
                     show_set([i, j, k])
                     pygame.display.flip()
-                    pygame.time.wait(1000)
+                    pygame.time.wait(3000)
                     screen.fill('black')
                     new_kaarten([i, j, k])
                     computer_score += 1
