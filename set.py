@@ -190,7 +190,6 @@ def show_no_set_message():
 # vind alle mogelijke sets, wordt niet gebruik in het programma
 def find_all_sets():
     sets = []
-    global computer_score, clicked, clicks, last_clicked
     for i in range (12):
         for j in range (i + 1, 12):
             for k in range (j + 1,12):
@@ -229,6 +228,8 @@ def change_cards():
 def is_set(clicked):
     kaart_tuples = []
     for kaart_pos in clicked:
+        if start_kaarten[kaart_pos] == None:
+            return False
         kaart_tuples.append(kaart_naar_tuple(kaart_pos))
     kleuren = []
     vormen = []
@@ -255,13 +256,45 @@ def check(list):
 
 # vervangt kaarten
 def new_kaarten(clicked):
-    for pos in clicked:
-        start_kaarten[pos] = new_kaart()
+    global difficulty
+    if len(image_dict) > 12:
+        for pos in clicked:
+            kaart_key = start_kaarten[pos]
+            del image_dict[kaart_key]
+            start_kaarten[pos] = new_kaart()
+    elif find_all_sets():
+        for pos in clicked:
+            kaart_key = start_kaarten[pos]
+            del image_dict[kaart_key]
+            start_kaarten[pos] = None
+    else:
+        end_game()
+
 
 # kiest random een nieuwe kaart die nog niet op het bord ligt
 def new_kaart():
     new = random.choice([i for i in list(image_dict.keys()) if i not in start_kaarten])
     return new
+
+
+# stopt het spel
+def end_game():
+    screen.fill((0, 0, 0))
+    font = pygame.font.SysFont("Arial", 48)
+    
+    if player_score > computer_score:
+        text = font.render("YOU WON!", True, (0, 255, 0))
+    elif computer_score > player_score:
+        text = font.render("COMPUTER WON!", True, (255, 0, 0))
+    else:
+        text = font.render("DRAW!", True, (0, 0, 255))
+    
+    text_rect = text.get_rect(center=(208, 331))
+    screen.blit(text, text_rect)
+    pygame.display.flip()
+    pygame.time.wait(30000)
+    pygame.quit()
+    exit()
 
 # Clear het scherm voordat je begint
 screen.fill('black')
@@ -278,7 +311,7 @@ while running:
         elif event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
             kaart_positie = get_kaart_pos(pos)
-            if last_clicked != kaart_positie:
+            if last_clicked != kaart_positie and start_kaarten[kaart_positie] != None:
                 if clicks < 3:
                     show_clicked(pos)
                     clicked.append(kaart_positie)
@@ -297,9 +330,10 @@ while running:
     i = 0
     for y in range(3):
         for x in range(4):
-            kaart_key = start_kaarten[i]
-            kaart = image_dict[kaart_key]
-            screen.blit(kaart, (2 + x * 104, 2 + y * 204))
+            if start_kaarten[i] != None:
+                kaart_key = start_kaarten[i]
+                kaart = image_dict[kaart_key]
+                screen.blit(kaart, (2 + x * 104, 2 + y * 204))
             i += 1
     screen.fill('black', rect=(0, 612, 416, 50))
     draw_score(player_score, computer_score)
