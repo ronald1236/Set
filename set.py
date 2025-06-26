@@ -122,9 +122,9 @@ def show_clicked(pos):
     screen.fill('green', rect = (col * 104, row * 204, 104, 204))
 
 # Changes the name of a card to tuple with 4 values, one for each attribute (#,#,#,#)
-def card_to_tuple(kaart_pos):
-    kaart_key = playing_cards[kaart_pos]
-    filename = filename_dict[kaart_key]
+def card_to_tuple(card_pos):
+    card_key = playing_cards[card_pos]
+    filename = filename_dict[card_key]
     name = filename.replace('.gif', '')
 
     if name.startswith('green'):
@@ -168,13 +168,13 @@ def card_to_tuple(kaart_pos):
 
 # Shows a blue outline around a set of cards
 def show_set(set):
-    for kaart in set:
-        row = kaart // 4
-        col = kaart % 4
+    for card in set:
+        row = card // 4
+        col = card % 4
         screen.fill('blue', rect = (col * 104, row * 204, 104, 204))
-        kaart_key = playing_cards[kaart]
-        kaart_image = image_dict[kaart_key]
-        screen.blit(kaart_image, (2 + col * 104, 2 + row * 204))
+        card_key = playing_cards[card]
+        card_image = image_dict[card_key]
+        screen.blit(card_image, (2 + col * 104, 2 + row * 204))
 
 # Shows a message when no set is found
 def show_no_set_message():
@@ -193,13 +193,13 @@ def new_cards(clicked):
     global difficulty
     if len(image_dict) > 12:
         for pos in clicked:
-            kaart_key = playing_cards[pos]
-            del image_dict[kaart_key]
+            card_key = playing_cards[pos]
+            del image_dict[card_key]
             playing_cards[pos] = new_card()
     elif find_all_sets():
         for pos in clicked:
-            kaart_key = playing_cards[pos]
-            del image_dict[kaart_key]
+            card_key = playing_cards[pos]
+            del image_dict[card_key]
             playing_cards[pos] = None
     else:
         end_game()
@@ -265,20 +265,20 @@ def find_set():
 
 # Checks if 3 card make a set
 def is_set(clicked):
-    kaart_tuples = []
-    for kaart_pos in clicked:
-        if playing_cards[kaart_pos] == None:
+    card_tuples = []
+    for card_pos in clicked:
+        if playing_cards[card_pos] == None:
             return False
-        kaart_tuples.append(card_to_tuple(kaart_pos))
+        card_tuples.append(card_to_tuple(card_pos))
     colors = []
     shapes = []
     shadings = []
     numbers = []
-    for kaart in kaart_tuples:
-        colors.append(kaart[0])
-        shapes.append(kaart[1])
-        shadings.append(kaart[2])
-        numbers.append(kaart[3])
+    for card in card_tuples:
+        colors.append(card[0])
+        shapes.append(card[1])
+        shadings.append(card[2])
+        numbers.append(card[3])
     if check(colors):
         if check(shapes):
             if check(shadings):
@@ -307,30 +307,31 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
-            card_position = get_card_pos(pos)
-            if last_clicked != card_position and playing_cards[card_position] != None:
-                if clicks < 3:
-                    show_clicked(pos)
-                    clicked.append(card_position)
-                    clicks += 1
-                    last_clicked = card_position
-                    if clicks == 3: # If 3 cards are clicked, start checking if they are a set
-                        if is_set(clicked):
-                            player_score += 1
-                            new_cards(clicked)
-                            start_time = pygame.time.get_ticks()
-                        clicked = []
-                        clicks = 0
-                        screen.fill('black')
-                        last_clicked = 13
+            if pos[1] < 612:
+                card_position = get_card_pos(pos)
+                if last_clicked != card_position and playing_cards[card_position] != None:
+                    if clicks < 3:
+                        show_clicked(pos)
+                        clicked.append(card_position)
+                        clicks += 1
+                        last_clicked = card_position
+                        if clicks == 3: # If 3 cards are clicked, start checking if they are a set
+                            if is_set(clicked):
+                                player_score += 1
+                                new_cards(clicked)
+                                start_time = pygame.time.get_ticks()
+                            clicked = []
+                            clicks = 0
+                            screen.fill('black')
+                            last_clicked = 13
     # draws the board
     i = 0
     for y in range(3):
         for x in range(4):
             if playing_cards[i] != None:
-                kaart_key = playing_cards[i]
-                kaart = image_dict[kaart_key]
-                screen.blit(kaart, (2 + x * 104, 2 + y * 204))
+                card_key = playing_cards[i]
+                card = image_dict[card_key]
+                screen.blit(card, (2 + x * 104, 2 + y * 204))
             i += 1
     screen.fill('black', rect=(0, 612, 416, 50))
     draw_score(player_score, computer_score)
