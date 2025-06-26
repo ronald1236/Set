@@ -2,7 +2,7 @@ import pygame
 import os 
 import random
 
-# activate the pygame lybrary
+# activate the pygame library
 pygame.init()
 pygame.font.init()
 
